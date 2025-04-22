@@ -13,6 +13,7 @@
 #include "utils/log.h"
 #include "config.h"
 #include "BLE.h"
+#include "SKDevice.h"
 
 void setup() {
     Serial.begin(115200);
@@ -22,6 +23,8 @@ void setup() {
     logInit();
     // 初始化 BLE 服务
     BLE::init();
+    // 初始化 SK 设备
+    SKDevice::init();
 
     LOG_INFO("Setup done!");
 }

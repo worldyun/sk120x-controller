@@ -8,12 +8,16 @@
  * @copyright Copyright (c) 2025
  * 
  */
+
+#pragma once
+
 #include <Arduino.h>
 #include "config.h"
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
+#include "SKDevice.h"
 
 class BLE {
 public:

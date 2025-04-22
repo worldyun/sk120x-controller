@@ -154,6 +154,6 @@ void BLE::ConfigCharacteristicCallbacks::onWrite(BLECharacteristic* characterist
  * @param characteristic 
  */
 void BLE::ConfigCharacteristicCallbacks::onRead(BLECharacteristic* characteristic) {
-    LOG_INFO("BLE 配置特征值已读取");
-    characteristic->setValue("Hello World");
+    LOG_INFO("BLE 所有配置特征值已读取");
+    characteristic->setValue((uint8_t *)(SKDevice::getInstance()->getSkDeviceModbusRegisters()), sizeof(SkDeviceModbusRegisters));
 }
