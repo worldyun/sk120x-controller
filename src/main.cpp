@@ -30,5 +30,6 @@ void setup() {
 }
 
 void loop() {
-    delay(1000);
+    // 永久挂起当前任务, 以节省 CPU 资源
+    vTaskSuspend(NULL);
 }
