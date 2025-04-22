@@ -1,3 +1,13 @@
+/**
+ * @file main.cpp
+ * @author WorldYun
+ * @brief 
+ * @version 0.1
+ * @date 2025-04-21
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include <Arduino.h>
 #include "log_init.h"
 #include "utils/log.h"

@@ -1,3 +1,13 @@
+/**
+ * @file BLE.h
+ * @author WorldYun
+ * @brief 
+ * @version 0.1
+ * @date 2025-04-21
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include <Arduino.h>
 #include "config.h"
 #include <BLEDevice.h>
@@ -18,19 +28,22 @@ private:
     static BLE* instance;
     BLEServer* bleServer;
     BLEService* bleService;
+    BLEAdvertising* bleAdvertising;
     BLECharacteristic* getAllConfigCharacteristic;
     BLECharacteristic* setConfigCharacteristic;
-    BLEAdvertising* bleAdvertising;
+    
 
     void start();
     void initBleService();
     void initBleCharacteristic();
 
+    // BLE 服务器回调类
     class Sk120xBLEServerCallbacks : public BLEServerCallbacks {
         void onConnect(BLEServer* pServer) override;
         void onDisconnect(BLEServer* pServer) override;
     };
 
+    // BLE 特征回调类
     class ConfigCharacteristicCallbacks : public BLECharacteristicCallbacks {
         void onWrite(BLECharacteristic* pCharacteristic) override;
         void onRead(BLECharacteristic* pCharacteristic) override;

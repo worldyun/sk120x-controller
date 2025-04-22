@@ -1,3 +1,14 @@
+/**
+ * @file log.h
+ * @author WorldYun
+ * @brief 
+ * @version 0.1
+ * @date 2025-04-21
+ * @note 此头文件定义了日志记录的宏和函数，用于在代码中输出不同级别的日志信息。
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include <ArduinoLog.h>
 
 #ifndef LOG_H

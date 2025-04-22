@@ -1,3 +1,13 @@
+/**
+ * @file BLE.cpp
+ * @author WorldYun
+ * @brief 
+ * @version 0.1
+ * @date 2025-04-21
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include "BLE.h"
 #include "utils/log.h"
 // 初始化静态成员变量
@@ -6,7 +16,10 @@ BLE* BLE::instance = nullptr;
 // 私有构造函数
 BLE::BLE() { }
 
-// 静态方法 初始化 BLE 服务
+/**
+ * @brief 初始化 BLE 服务
+ * 
+ */
 void BLE::init() {
     LOG_INFO("BLE 服务正在初始化");
     if (instance == nullptr) {
@@ -18,7 +31,10 @@ void BLE::init() {
     LOG_INFO("BLE 服务初始化完成");
 }
 
-// 启动BleService 并启动广播
+/**
+ * @brief 启动BleService 并启动广播
+ * 
+ */
 void BLE::start() {
     // 启动服务
     bleService->start();
@@ -31,6 +47,10 @@ void BLE::start() {
     bleServer->getAdvertising()->start();
 }
 
+/**
+ * @brief 初始化BLE服务
+ * 
+ */
 void BLE::initBleService() {
     // 初始化BLE
     // 获取BLE地址并设置设备名
@@ -53,15 +73,18 @@ void BLE::initBleService() {
     bleService = bleServer->createService(CONFIG_BLE_SERVICE_UUID);
 }
 
+/**
+ * @brief 初始化BLE特征
+ * 
+ */
 void BLE::initBleCharacteristic() {
     ConfigCharacteristicCallbacks* configCharacteristicCallbacks = new ConfigCharacteristicCallbacks();
-    BLE2902* ble2902 = new BLE2902();
     // 创建获取所有配置的BLE特征  只读
     getAllConfigCharacteristic = bleService->createCharacteristic(
         CONFIG_BLE_GET_ALL_CONFIG_CHARACTERISTIC_UUID,
         BLECharacteristic::PROPERTY_READ
     );
-    getAllConfigCharacteristic->addDescriptor(ble2902);
+    getAllConfigCharacteristic->addDescriptor(new BLE2902());
     getAllConfigCharacteristic->setCallbacks(configCharacteristicCallbacks);
     
     // 创建设置配置的BLE特征
@@ -70,15 +93,23 @@ void BLE::initBleCharacteristic() {
         BLECharacteristic::PROPERTY_WRITE
     );
     // 注册回调
-    setConfigCharacteristic->addDescriptor(ble2902);
+    setConfigCharacteristic->addDescriptor(new BLE2902());
     setConfigCharacteristic->setCallbacks(configCharacteristicCallbacks);
 }
 
+/**
+ * @brief 获取BLE实例
+ * 
+ * @return BLE* 单实例
+ */
 BLE* BLE::getInstance() {
     return instance;
 }
 
-// 重新开始广播
+/**
+ * @brief 重新开始广播
+ * 
+ */
 void BLE::restartAdvertising() {
     if (bleAdvertising != nullptr && bleServer != nullptr) {
         bleServer->startAdvertising();
@@ -86,26 +117,42 @@ void BLE::restartAdvertising() {
 }
 
 
-// BLEServer onConnect 回调
+/**
+ * @brief BLEServer onConnect 回调
+ * 
+ * @param server 
+ */
 void BLE::Sk120xBLEServerCallbacks::onConnect(BLEServer* server) {
     LOG_INFO("BLE 设备已连接");
 }
 
-// BLEServer onDisconnect 回调
+/**
+ * @brief BLEServer onDisconnect 回调
+ * 
+ * @param server 
+ */
 void BLE::Sk120xBLEServerCallbacks::onDisconnect(BLEServer* server) {
     LOG_INFO("BLE 连接已断开");
     // 断开连接后开始重新广播
     BLE::getInstance()->restartAdvertising();
 }
 
-// 设置配置的 onWrite 回调
+/**
+ * @brief 设置配置的 onWrite 回调
+ * 
+ * @param characteristic 
+ */
 void BLE::ConfigCharacteristicCallbacks::onWrite(BLECharacteristic* characteristic) {
     LOG_INFO("BLE 配置特征值已写入");
     std::string value = characteristic->getValue();
     LOG_INFO("Received: %s", value.c_str());
 }
 
-// 获取所有配置的 onRead 回调
+/**
+ * @brief 获取所有配置的 onRead 回调
+ * 
+ * @param characteristic 
+ */
 void BLE::ConfigCharacteristicCallbacks::onRead(BLECharacteristic* characteristic) {
     LOG_INFO("BLE 配置特征值已读取");
     characteristic->setValue("Hello World");

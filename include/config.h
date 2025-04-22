@@ -1,3 +1,13 @@
+/**
+ * @file config.h
+ * @author WorldYun
+ * @brief 
+ * @version 0.1
+ * @date 2025-04-21
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #ifndef __SK120X_CTRL_CONFIG_H__
 #define __SK120X_CTRL_CONFIG_H__
 
