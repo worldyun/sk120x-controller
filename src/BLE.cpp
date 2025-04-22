@@ -10,6 +10,9 @@
  */
 #include "BLE.h"
 #include "utils/log.h"
+#include "BLEWriteData.h"
+#include "UserService.h"
+
 // 初始化静态成员变量
 BLE* BLE::instance = nullptr;
 
@@ -143,9 +146,11 @@ void BLE::Sk120xBLEServerCallbacks::onDisconnect(BLEServer* server) {
  * @param characteristic 
  */
 void BLE::ConfigCharacteristicCallbacks::onWrite(BLECharacteristic* characteristic) {
-    LOG_INFO("BLE 配置特征值已写入");
-    std::string value = characteristic->getValue();
-    LOG_INFO("Received: %s", value.c_str());
+    
+    LOG_INFO("BLE 配置特征值已写入: %s", characteristic->getData());
+    // 解析数据
+    BLEWriteData bLEWriteData(characteristic);
+    UserService::getInstance()->execFunc(&bLEWriteData); // 执行功能函数
 }
 
 /**

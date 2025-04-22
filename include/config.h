@@ -76,7 +76,14 @@
     //如果不需要验证可以注释掉
     #define CONFIG_SK_DEVICE_REGISTERS_WRITE_VERIFY_ENABLE
 
-
+    //操作码枚举
+    namespace BLE_FUNC_CODE {
+        enum BLE_FUNC_CODE_ENUM {
+            SK_READ_REGISTER = 0x00,     //读寄存器
+            SK_WRITE_REGISTER = 0x01,    //写寄存器
+            SK_READ_ALL_REGISTER = 0x03, //读所有寄存器
+        };
+    };
 
     //SK设备ModBus寄存器地址
     namespace SK_DEVICE_MODBUS_REGISTER_ADDRESS {
