@@ -62,7 +62,7 @@ void BLE::start() {
             }
         },
         "BLENotifyTask",
-        2048,
+        CONFIG_TASK_STACK_SIZE,
         this,
         1,
         nullptr

@@ -23,6 +23,9 @@
     //日志级别
     #define CONFIG_LOG_LEVEL LOG_LEVEL_INFO
 
+    //task堆栈大小
+    #define CONFIG_TASK_STACK_SIZE 2048
+
     //BLE功率
     #define CONFIG_BLE_POWER_LVL ESP_PWR_LVL_P9
 
