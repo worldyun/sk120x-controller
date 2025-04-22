@@ -35,6 +35,8 @@ private:
     BLEAdvertising* bleAdvertising;
     BLECharacteristic* getAllConfigCharacteristic;
     BLECharacteristic* setConfigCharacteristic;
+    BLECharacteristic* notifyTop10RegCharacteristic;
+    bool isConnected = false; // 是否连接
     
 
     void start();

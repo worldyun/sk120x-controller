@@ -48,6 +48,25 @@ void BLE::start() {
     bleAdvertising->setMinPreferred(0x06); // 设置广告间隔
     bleAdvertising->setMaxPreferred(0x12);
     bleServer->getAdvertising()->start();
+    //创建一个每秒执行的通知任务
+    xTaskCreate(
+        [](void* param) {
+            BLE* ble = static_cast<BLE*>(param);
+            while (true) {
+                // 发送通知
+                if (ble->notifyTop10RegCharacteristic != nullptr && ble->isConnected && SKDevice::getInstance() != nullptr && SKDevice::getInstance()->isInited) {
+                    ble->notifyTop10RegCharacteristic->setValue((uint8_t *)(SKDevice::getInstance()->getSkDeviceModbusRegisters()), CONFIG_BLE_NOTIFY_TOP10_REG_SIZE);
+                    ble->notifyTop10RegCharacteristic->notify(); // 发送通知
+                }
+                vTaskDelay(pdMS_TO_TICKS(CONFIG_BLE_NOTIFY_TOP10_REG_INTERVAL));
+            }
+        },
+        "BLENotifyTask",
+        2048,
+        this,
+        1,
+        nullptr
+    );
 }
 
 /**
@@ -95,9 +114,18 @@ void BLE::initBleCharacteristic() {
         CONFIG_BLE_SET_CONFIG_CHARACTERISTIC_UUID,
         BLECharacteristic::PROPERTY_WRITE
     );
+
     // 注册回调
     setConfigCharacteristic->addDescriptor(new BLE2902());
     setConfigCharacteristic->setCallbacks(configCharacteristicCallbacks);
+
+    // 创建通知特征
+    notifyTop10RegCharacteristic = bleService->createCharacteristic(
+        CONFIG_BLE_NOTIFY_TOP10_REG_CHARACTERISTIC_UUID,
+        BLECharacteristic::PROPERTY_NOTIFY
+    );
+    notifyTop10RegCharacteristic->addDescriptor(new BLE2902());
+    
 }
 
 /**
@@ -126,6 +154,7 @@ void BLE::restartAdvertising() {
  * @param server 
  */
 void BLE::Sk120xBLEServerCallbacks::onConnect(BLEServer* server) {
+    BLE::getInstance()->isConnected = true; // 设置连接状态
     LOG_INFO("BLE 设备已连接");
 }
 
@@ -135,6 +164,7 @@ void BLE::Sk120xBLEServerCallbacks::onConnect(BLEServer* server) {
  * @param server 
  */
 void BLE::Sk120xBLEServerCallbacks::onDisconnect(BLEServer* server) {
+    BLE::getInstance()->isConnected = false; // 设置连接状态
     LOG_INFO("BLE 连接已断开");
     // 断开连接后开始重新广播
     BLE::getInstance()->restartAdvertising();
@@ -146,7 +176,7 @@ void BLE::Sk120xBLEServerCallbacks::onDisconnect(BLEServer* server) {
  * @param characteristic 
  */
 void BLE::ConfigCharacteristicCallbacks::onWrite(BLECharacteristic* characteristic) {
-    
+
     LOG_INFO("BLE 配置特征值已写入: %s", characteristic->getData());
     // 解析数据
     BLEWriteData bLEWriteData(characteristic);
@@ -162,3 +192,4 @@ void BLE::ConfigCharacteristicCallbacks::onRead(BLECharacteristic* characteristi
     LOG_INFO("BLE 所有配置特征值已读取");
     characteristic->setValue((uint8_t *)(SKDevice::getInstance()->getSkDeviceModbusRegisters()), sizeof(SkDeviceModbusRegisters));
 }
+

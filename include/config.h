@@ -38,6 +38,15 @@
     //BLE服务Set Config Characteristic UUID
     #define CONFIG_BLE_SET_CONFIG_CHARACTERISTIC_UUID "5f734ee8-4ff7-4fde-8918-61a363974e6e"
 
+    //BLE服务Notify Top10 Reg Characteristic UUID
+    #define CONFIG_BLE_NOTIFY_TOP10_REG_CHARACTERISTIC_UUID "f2c4b5a0-1d3e-4b8f-9c6d-7a2e5f3b8a0b"
+
+    //BLE服务Notify Top10 Reg 通知间隔时间 200ms
+    #define CONFIG_BLE_NOTIFY_TOP10_REG_INTERVAL 200
+
+    //BLE服务Notify Top10 Reg 字节数
+    #define CONFIG_BLE_NOTIFY_TOP10_REG_SIZE 20
+
     //SK设备串口RX引脚
     #define CONFIG_SK_DEVICE_SERIAL_RX_PIN GPIO_NUM_18
 

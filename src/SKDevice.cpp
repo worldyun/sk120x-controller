@@ -48,7 +48,8 @@ void SKDevice::init() {
     instance->initSKSerialAndModbus();
     instance->initSKDeviceRegisters();
     instance->initTop10RegistersAutoRead();
-    
+    instance->isInited = true; // 设置初始化完成标志
+    LOG_INFO("SK 设备初始化完成");
 }
 
 void SKDevice::initSKSerialAndModbus() {

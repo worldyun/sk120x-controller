@@ -21,6 +21,7 @@
 class SKDevice
 {
 public:
+    bool isInited = false; // 是否初始化完成
     static void init();
     static SKDevice* getInstance();
     SkDeviceModbusRegisters* getSkDeviceModbusRegisters(); // 获取ModBus寄存器对象
