@@ -100,24 +100,23 @@ void BLE::initBleService() {
  * 
  */
 void BLE::initBleCharacteristic() {
-    ConfigCharacteristicCallbacks* configCharacteristicCallbacks = new ConfigCharacteristicCallbacks();
     // 创建获取所有配置的BLE特征  只读
     getAllConfigCharacteristic = bleService->createCharacteristic(
         CONFIG_BLE_GET_ALL_CONFIG_CHARACTERISTIC_UUID,
         BLECharacteristic::PROPERTY_READ
     );
     getAllConfigCharacteristic->addDescriptor(new BLE2902());
-    getAllConfigCharacteristic->setCallbacks(configCharacteristicCallbacks);
+    getAllConfigCharacteristic->setCallbacks(new ReadAllConfigCallbacks());
     
     // 创建设置配置的BLE特征
     setConfigCharacteristic = bleService->createCharacteristic(
         CONFIG_BLE_SET_CONFIG_CHARACTERISTIC_UUID,
-        BLECharacteristic::PROPERTY_WRITE
+        BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_READ
     );
 
     // 注册回调
     setConfigCharacteristic->addDescriptor(new BLE2902());
-    setConfigCharacteristic->setCallbacks(configCharacteristicCallbacks);
+    setConfigCharacteristic->setCallbacks(new SetConfigCallbacks());
 
     // 创建通知特征
     notifyTop10RegCharacteristic = bleService->createCharacteristic(
@@ -175,12 +174,12 @@ void BLE::Sk120xBLEServerCallbacks::onDisconnect(BLEServer* server) {
  * 
  * @param characteristic 
  */
-void BLE::ConfigCharacteristicCallbacks::onWrite(BLECharacteristic* characteristic) {
+void BLE::SetConfigCallbacks::onWrite(BLECharacteristic* characteristic) {
 
     LOG_INFO("BLE 配置特征值已写入: %s", characteristic->getData());
     // 解析数据
     BLEWriteData bLEWriteData(characteristic);
-    UserService::getInstance()->execFunc(&bLEWriteData); // 执行功能函数
+    UserService::getInstance()->execFunc(&bLEWriteData, characteristic); // 执行功能函数
 }
 
 /**
@@ -188,8 +187,10 @@ void BLE::ConfigCharacteristicCallbacks::onWrite(BLECharacteristic* characterist
  * 
  * @param characteristic 
  */
-void BLE::ConfigCharacteristicCallbacks::onRead(BLECharacteristic* characteristic) {
+void BLE::ReadAllConfigCallbacks::onRead(BLECharacteristic* characteristic) {
     LOG_INFO("BLE 所有配置特征值已读取");
+    // 读取所有配置
+    SKDevice::getInstance()->readSkDeviceRegisters(); // 读取寄存器
     characteristic->setValue((uint8_t *)(SKDevice::getInstance()->getSkDeviceModbusRegisters()), sizeof(SkDeviceModbusRegisters));
 }
 

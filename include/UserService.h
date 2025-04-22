@@ -20,7 +20,7 @@ class UserService
 
 public:
     static UserService* getInstance(); // 获取单例对象
-    void execFunc(BLEWriteData* bleWriteData); // 执行功能函数
+    void execFunc(BLEWriteData* bleWriteData, BLECharacteristic* characteristic); // 执行功能函数
 
 private:
     static UserService* instance;

@@ -180,7 +180,7 @@ SkDeviceModbusRegisters* SKDevice::getSkDeviceModbusRegisters() {
  * @param register_addr 寄存器地址
  * @param data 寄存器数据
  */
-u16_t SKDevice::setSkDeviceRegister(u16_t registerAddr, u16_t data) {
+uint16_t SKDevice::setSkDeviceRegister(uint16_t registerAddr, uint16_t data) {
     if (!isWritableRegister(registerAddr)) {
         LOG_ERROR("SK 寄存器地址 %X 不可写", registerAddr);
         return ESP_FAIL;
@@ -199,13 +199,19 @@ u16_t SKDevice::setSkDeviceRegister(u16_t registerAddr, u16_t data) {
         return ESP_FAIL; // 设置失败，返回错误代码
     }
     LOG_INFO("SK 寄存器设置成功, 地址: %X, 数据: %d", registerAddr, readData);
-#endif
     //解锁
-        xSemaphoreGive(modbusMutex);
+    xSemaphoreGive(modbusMutex);
     return readData; // 返回读取的数据
+#else
+    LOG_INFO("SK 寄存器设置成功, 地址: %X, 数据: %d", registerAddr, data);
+    //解锁
+    xSemaphoreGive(modbusMutex);
+    return data; // 返回设置的数据
+#endif
+    
 }
 
-bool SKDevice::isWritableRegister(u16_t registerAddr) {
+bool SKDevice::isWritableRegister(uint16_t registerAddr) {
     return writableRegistersAddress.count(registerAddr);
 }
 
@@ -215,7 +221,7 @@ bool SKDevice::isWritableRegister(u16_t registerAddr) {
  * 
  * @param registerNumber 寄存器数量
  */
-void SKDevice::readSkDeviceRegisters(u16_t registerNumber) {
+void SKDevice::readSkDeviceRegisters(uint16_t registerNumber) {
     if (registerNumber > sizeof(SkDeviceModbusRegisters) / sizeof(uint16_t)) {
         LOG_ERROR("SK 读取寄存器数量超过限制");
         return;
@@ -240,5 +246,20 @@ void SKDevice::initMutex() {
     if (modbusMutex == NULL) {
         LOG_ERROR("SK 互斥锁创建失败");
     }
+}
+
+/**
+ * @brief 读取SK设备寄存器
+ * 
+ * @param registerAddr 寄存器地址
+ * @return uint16_t 寄存器数据
+ */
+uint16_t SKDevice::readSkDeviceRegister(uint16_t registerAddr) {
+    //加锁
+    xSemaphoreTake(modbusMutex, portMAX_DELAY);
+    uint16_t data = skModbus->readHoldingRegister(CONFIG_SK_DEVICE_MODBUS_ADDRESS, registerAddr); // 读取寄存器
+    //解锁
+    xSemaphoreGive(modbusMutex);
+    return data; // 返回读取的数据
 }
 

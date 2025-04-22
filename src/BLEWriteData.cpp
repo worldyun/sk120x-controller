@@ -19,7 +19,7 @@ BLEWriteData::BLEWriteData(BLECharacteristic* characteristic) {
     funCode = bleData[0]; // 获取功能码
     funcData = (uint8_t*)((size_t)bleData + 1); // 获取功能码数据
     funcDataLength = bleDataLength - 1; // 获取功能码数据长度
-    if (funCode == BLE_FUNC_CODE::SK_READ_REGISTER || funCode == BLE_FUNC_CODE::SK_WRITE_REGISTER) {
+    if (funCode == BLE_FUNC_CODE::SK_READ_REGISTER || funCode == BLE_FUNC_CODE::SK_WRITE_REGISTER || funCode == BLE_FUNC_CODE::SK_READ_REGISTER_BATCH) {
         registerAddr = *(uint16_t*)((size_t)bleData + 1); // 获取寄存器地址
     }
     if (funCode == BLE_FUNC_CODE::SK_WRITE_REGISTER) {

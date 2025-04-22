@@ -50,8 +50,12 @@ private:
     };
 
     // BLE 特征回调类
-    class ConfigCharacteristicCallbacks : public BLECharacteristicCallbacks {
+    class SetConfigCallbacks : public BLECharacteristicCallbacks {
         void onWrite(BLECharacteristic* pCharacteristic) override;
+    };
+
+    //ReadAllConfig回调
+    class ReadAllConfigCallbacks : public BLECharacteristicCallbacks {
         void onRead(BLECharacteristic* pCharacteristic) override;
     };
 };

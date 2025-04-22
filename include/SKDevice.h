@@ -25,16 +25,17 @@ public:
     static void init();
     static SKDevice* getInstance();
     SkDeviceModbusRegisters* getSkDeviceModbusRegisters(); // 获取ModBus寄存器对象
-    u16_t setSkDeviceRegister(u16_t registerAddr, u16_t data); // 设置SK寄存器
-    void readSkDeviceRegisters(u16_t registerNumber = sizeof(SkDeviceModbusRegisters) / sizeof(uint16_t));   // 读取SK设备前registerNumber个寄存器 
+    uint16_t setSkDeviceRegister(uint16_t registerAddr, uint16_t data); // 设置SK寄存器
+    void readSkDeviceRegisters(uint16_t registerNumber = sizeof(SkDeviceModbusRegisters) / sizeof(uint16_t));   // 读取SK设备前registerNumber个寄存器 
+    uint16_t readSkDeviceRegister(uint16_t registerAddr); // 读取SK设备寄存器
 
 
 private:
     static SKDevice* instance;
     DFRobot_RTU * skModbus; // ModBus RTU对象
     SkDeviceModbusRegisters* skDeviceModbusRegisters; // ModBus寄存器对象
-    const std::set<u16_t> writableRegistersAddress = {CONFIG_SK_DEVICE_WRITABLE_REGISTERS_ADDRESS}; // 可写寄存器地址集合
-    bool isWritableRegister(u16_t registerAddr); // 判断寄存器是否可写
+    const std::set<uint16_t> writableRegistersAddress = {CONFIG_SK_DEVICE_WRITABLE_REGISTERS_ADDRESS}; // 可写寄存器地址集合
+    bool isWritableRegister(uint16_t registerAddr); // 判断寄存器是否可写
     SemaphoreHandle_t modbusMutex; // 互斥锁
 
 

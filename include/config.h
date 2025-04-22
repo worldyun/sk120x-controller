@@ -91,9 +91,10 @@
     //操作码枚举
     namespace BLE_FUNC_CODE {
         enum BLE_FUNC_CODE_ENUM {
-            SK_READ_REGISTER = 0x00,     //读寄存器
-            SK_WRITE_REGISTER = 0x01,    //写寄存器
-            SK_READ_ALL_REGISTER = 0x03, //读所有寄存器
+            SK_READ_REGISTER_BATCH = 0x00,     //批量读寄存器
+            SK_WRITE_REGISTER = 0x01,          //写寄存器
+            SK_READ_REGISTER = 0x02,         //读寄存器
+            SK_READ_ALL_REGISTER = 0x03,     //读所有寄存器
         };
     };
 
