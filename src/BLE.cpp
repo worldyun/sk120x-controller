@@ -54,7 +54,11 @@ void BLE::start() {
             BLE* ble = static_cast<BLE*>(param);
             while (true) {
                 // 发送通知
-                if (ble->notifyTop10RegCharacteristic != nullptr && ble->isConnected && SKDevice::getInstance() != nullptr && SKDevice::getInstance()->isInited) {
+                if ( ble->bleServer->getConnectedCount() > 0 
+                        && ble->notifyTop10RegCharacteristic != nullptr 
+                        && ble->isConnected 
+                        && SKDevice::getInstance() != nullptr 
+                        && SKDevice::getInstance()->isInited) {
                     ble->notifyTop10RegCharacteristic->setValue((uint8_t *)(SKDevice::getInstance()->getSkDeviceModbusRegisters()), CONFIG_BLE_NOTIFY_TOP10_REG_SIZE);
                     ble->notifyTop10RegCharacteristic->notify(); // 发送通知
                 }
@@ -124,6 +128,7 @@ void BLE::initBleCharacteristic() {
         BLECharacteristic::PROPERTY_NOTIFY
     );
     notifyTop10RegCharacteristic->addDescriptor(new BLE2902());
+    notifyTop10RegCharacteristic->setCallbacks(new NotifyTop10RegCallbacks());
     
 }
 
@@ -192,5 +197,19 @@ void BLE::ReadAllConfigCallbacks::onRead(BLECharacteristic* characteristic) {
     // 读取所有配置
     SKDevice::getInstance()->readSkDeviceRegisters(); // 读取寄存器
     characteristic->setValue((uint8_t *)(SKDevice::getInstance()->getSkDeviceModbusRegisters()), sizeof(SkDeviceModbusRegisters));
+}
+
+
+/**
+ * @brief 通知前10个寄存器的 onStatus 回调
+ * 
+ * @param characteristic 
+ */
+void BLE::NotifyTop10RegCallbacks::onStatus(BLECharacteristic* characteristic, BLECharacteristicCallbacks::Status s, uint32_t code) {
+    if (s == BLECharacteristicCallbacks::Status::ERROR_GATT) {
+        LOG_ERROR("BLE 通知失败, 重启");
+        //重启
+        ESP.restart();
+    }
 }
 

@@ -58,4 +58,9 @@ private:
     class ReadAllConfigCallbacks : public BLECharacteristicCallbacks {
         void onRead(BLECharacteristic* pCharacteristic) override;
     };
+
+    //NotifyTop10Reg回调
+    class NotifyTop10RegCallbacks : public BLECharacteristicCallbacks {
+        void onStatus(BLECharacteristic* pCharacteristic, BLECharacteristicCallbacks::Status s, uint32_t code) override;
+    };
 };

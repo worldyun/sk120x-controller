@@ -44,8 +44,8 @@
     //BLE服务Notify Top10 Reg Characteristic UUID
     #define CONFIG_BLE_NOTIFY_TOP10_REG_CHARACTERISTIC_UUID "f2c4b5a0-1d3e-4b8f-9c6d-7a2e5f3b8a0b"
 
-    //BLE服务Notify Top10 Reg 通知间隔时间 200ms
-    #define CONFIG_BLE_NOTIFY_TOP10_REG_INTERVAL 200
+    //BLE服务Notify Top10 Reg 通知间隔时间
+    #define CONFIG_BLE_NOTIFY_TOP10_REG_INTERVAL 500
 
     //BLE服务Notify Top10 Reg 字节数
     #define CONFIG_BLE_NOTIFY_TOP10_REG_SIZE 20
@@ -68,8 +68,8 @@
     //SK设备AllConfig大小   24*2=48字节
     #define CONFIG_SK_DEVICE_ALL_CONFIG_SIZE 36*2
 
-    //SK 常用寄存器地址定时读取间隔时间 200ms
-    #define CONFIG_SK_DEVICE_REGISTERS_READ_INTERVAL 200
+    //SK 常用寄存器地址定时读取间隔时间
+    #define CONFIG_SK_DEVICE_REGISTERS_READ_INTERVAL 333
 
     //SK设备可写寄存器地址
     #define CONFIG_SK_DEVICE_WRITABLE_REGISTERS_ADDRESS SK_DEVICE_MODBUS_REGISTER_ADDRESS::V_SET, \

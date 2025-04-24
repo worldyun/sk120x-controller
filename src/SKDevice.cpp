@@ -194,18 +194,18 @@ uint16_t SKDevice::setSkDeviceRegister(uint16_t registerAddr, uint16_t data) {
 #ifdef CONFIG_SK_DEVICE_REGISTERS_WRITE_VERIFY_ENABLE
     // 读取寄存器以验证设置是否成功
     uint16_t readData = skModbus->readHoldingRegister(CONFIG_SK_DEVICE_MODBUS_ADDRESS, registerAddr);
+    //解锁
+    xSemaphoreGive(modbusMutex);
     if (readData != data) {
         LOG_ERROR("SK 寄存器设置失败, 地址: %X, 设置数据: %d, 读取数据: %d", registerAddr, data, readData);
-        return ESP_FAIL; // 设置失败，返回错误代码
+    } else {
+        LOG_INFO("SK 寄存器设置成功, 地址: %X, 数据: %d", registerAddr, readData);
     }
-    LOG_INFO("SK 寄存器设置成功, 地址: %X, 数据: %d", registerAddr, readData);
-    //解锁
-    xSemaphoreGive(modbusMutex);
     return readData; // 返回读取的数据
 #else
-    LOG_INFO("SK 寄存器设置成功, 地址: %X, 数据: %d", registerAddr, data);
     //解锁
     xSemaphoreGive(modbusMutex);
+    LOG_INFO("SK 寄存器已设置, 地址: %X, 数据: %d", registerAddr, data);
     return data; // 返回设置的数据
 #endif
     
