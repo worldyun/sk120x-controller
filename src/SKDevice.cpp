@@ -78,14 +78,21 @@ void SKDevice::initSKDeviceRegisters() {
     //解锁
     xSemaphoreGive(modbusMutex);
 
-    //读取设备信息
+    //初始化寄存器对象
     skDeviceModbusRegisters = (SkDeviceModbusRegisters *)malloc(sizeof(SkDeviceModbusRegisters));
     if (skDeviceModbusRegisters == NULL) {
-        LOG_ERROR("SK 寄存器内存分配失败");
-        return;
+        LOG_ERROR("SK 寄存器内存分配失败，重启中...");
+        // 重启
+        ESP.restart();
     }
+    memset(skDeviceModbusRegisters, 0, sizeof(SkDeviceModbusRegisters));
+
     // 读取寄存器值
-    readSkDeviceRegisters();
+    if (readSkDeviceRegisters() != 0) {
+        LOG_ERROR("SK 设备寄存器初始化失败，重启中...");
+        // 重启
+        ESP.restart();
+    }
     LOG_INFO("SK 设备寄存器初始化完成");
     if (CONFIG_LOG_LEVEL >= LOG_LEVEL_INFO) {
         // 打印值以验证
@@ -220,20 +227,34 @@ bool SKDevice::isWritableRegister(uint16_t registerAddr) {
  * @brief 读取SK设备前registerNumber个寄存器 
  * 
  * @param registerNumber 寄存器数量
+ * @return uint8_t 错误码，0表示成功
  */
-void SKDevice::readSkDeviceRegisters(uint16_t registerNumber) {
+uint8_t SKDevice::readSkDeviceRegisters(uint16_t registerNumber) {
     if (registerNumber > sizeof(SkDeviceModbusRegisters) / sizeof(uint16_t)) {
         LOG_ERROR("SK 读取寄存器数量超过限制");
-        return;
+        return ESP_FAIL; // 返回错误码
     }
-    for (size_t i = 0; i < registerNumber; i++) {
-        uint16_t* p = (uint16_t*)(((size_t)skDeviceModbusRegisters) + i * 2);
-        //加锁
-        xSemaphoreTake(modbusMutex, portMAX_DELAY);
-        *p = skModbus->readHoldingRegister(CONFIG_SK_DEVICE_MODBUS_ADDRESS, i);
-        //解锁
-        xSemaphoreGive(modbusMutex);
+
+    // 采用一次读多个寄存器的方式
+    LOG_INFO("SK 读取前 %d 个寄存器", registerNumber);
+    //加锁
+    xSemaphoreTake(modbusMutex, portMAX_DELAY);
+    uint8_t err = skModbus->readHoldingRegister(CONFIG_SK_DEVICE_MODBUS_ADDRESS, 0x0, (uint16_t*)skDeviceModbusRegisters, registerNumber);
+    //解锁
+    xSemaphoreGive(modbusMutex);
+    if (err != 0) {
+        LOG_ERROR("SK 读取寄存器失败");
     }
+    
+    return err;
+    // for (size_t i = 0; i < registerNumber; i++) {
+    //     uint16_t* p = (uint16_t*)(((size_t)skDeviceModbusRegisters) + i * 2);
+    //     //加锁
+    //     xSemaphoreTake(modbusMutex, portMAX_DELAY);
+    //     *p = skModbus->readHoldingRegister(CONFIG_SK_DEVICE_MODBUS_ADDRESS, i);
+    //     //解锁
+    //     xSemaphoreGive(modbusMutex);
+    // }
 }
 
 /**

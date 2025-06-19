@@ -26,7 +26,7 @@ public:
     static SKDevice* getInstance();
     SkDeviceModbusRegisters* getSkDeviceModbusRegisters(); // 获取ModBus寄存器对象
     uint16_t setSkDeviceRegister(uint16_t registerAddr, uint16_t data); // 设置SK寄存器
-    void readSkDeviceRegisters(uint16_t registerNumber = sizeof(SkDeviceModbusRegisters) / sizeof(uint16_t));   // 读取SK设备前registerNumber个寄存器 
+    uint8_t readSkDeviceRegisters(uint16_t registerNumber = sizeof(SkDeviceModbusRegisters) / sizeof(uint16_t));   // 读取SK设备前registerNumber个寄存器 
     uint16_t readSkDeviceRegister(uint16_t registerAddr); // 读取SK设备寄存器
 
 
