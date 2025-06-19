@@ -26,7 +26,7 @@ void setup() {
 
     // 等待2秒以确保SK设备启动完成
     LOG_INFO("等待 SK 设备启动");
-    delay(CONFIG_SK_DEVICE_STARTUP_WAIT_TIME);
+    vTaskDelay(pdMS_TO_TICKS(CONFIG_SK_DEVICE_STARTUP_WAIT_TIME));
 
     // 初始化 SK 设备
     SKDevice::init();
