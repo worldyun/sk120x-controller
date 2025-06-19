@@ -32,7 +32,7 @@
 
 2. **软件准备**：
 - 乐鑫官方[Flash下载工具](https://docs.espressif.com/projects/esp-test-tools/zh_CN/latest/esp32/production_stage/tools/flash_download_tool.html)
-- 设备固件[sk120x-controller-firmware.bin](./releases)
+- 设备固件[sk120x-controller-firmware.bin](https://github.com/worldyun/sk120x-controller/releases)
 - 移动端上位机软件[sk120x-controller-app](https://github.com/worldyun/sk120x-controller-app)
 
 3. 固件烧录
