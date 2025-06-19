@@ -17,6 +17,27 @@
 - [sk120x-controller-app](https://github.com/worldyun/sk120x-controller-app)
 
 ---
+## 🚀 快速开始
+1. **硬件准备**：
+- 硬件设备：ESP32C3开发板或核心板，xm1.25毫米间距4p连接线
+
+- 设备连接： 
+
+  | ESP32C3开发板 | SK120X |
+  | :-----------: | :----: |
+  |      5V       |   5V   |
+  |    GOIO18     |   TX   |
+  |    GPIO19     |   RX   |
+  |      GND      |  GND   |
+
+2. **软件准备**：
+- 乐鑫官方[Flash下载工具](https://docs.espressif.com/projects/esp-test-tools/zh_CN/latest/esp32/production_stage/tools/flash_download_tool.html)
+- 设备固件[sk120x-controller-firmware.bin](./releases)
+- 移动端上位机软件[sk120x-controller-app](https://github.com/worldyun/sk120x-controller-app)
+
+3. 固件烧录
+- 参考乐鑫官方[Flash下载工具](https://docs.espressif.com/projects/esp-test-tools/zh_CN/latest/esp32/production_stage/tools/flash_download_tool.html)，将`sk120x-controller-firmware.bin`下载至ESP32C3`0x0`地址。
+---
 
 ## 🧩 核心组件
 
@@ -46,16 +67,16 @@
 - 解析 BLE 写入的数据包。
 - 提取功能码、寄存器地址和数据内容。
 
-### 5. **日志模块 ([log_init.h](https://github.com/worldyun/sk120x-controller/tree/main/include/log_init.h), `utils/log.h`)**
+### 5. **日志模块 ([log_init.h](./include/log_init.h), `utils/log.h`)**
 - 基于 `ArduinoLog` 实现日志输出。
 - 支持多种日志级别（INFO, ERROR, WARNING 等）。
 - 输出时间戳和调用上下文信息。
 
 ---
 
-## ⚙️ 配置选项 ([config.h](https://github.com/worldyun/sk120x-controller/tree/main/include/config.h))
+## ⚙️ 配置选项 ([config.h](./include/config.h))
 
-项目中可通过 [config.h](https://github.com/worldyun/sk120x-controller/tree/main/include/config.h) 修改以下参数：
+项目中可通过 [config.h](./include/config.h) 修改以下参数：
 
 - BLE 服务 UUID 和特征值 UUID
 - BLE 广播功率、MTU 大小
@@ -128,9 +149,9 @@ pio run -t upload
 ## 📝 注意事项
 
 - BLE 服务需在手机或其他 BLE 客户端上扫描并连接。推荐使用此项目配套的移动端上位机软件[sk120x-controller-app](https://github.com/worldyun/sk120x-controller-app)。
-- SK120X 设备需通过[UART接口](https://github.com/worldyun/sk120x-controller/tree/main/include/config.h#L53-L57)与 ESP32-C3 正确连接。
-- 若更改 ModBus 地址，请确保 [CONFIG_SK_DEVICE_MODBUS_ADDRESS](https://github.com/worldyun/sk120x-controller/tree/main/include/config.h#L65-L66) 与设备一致。
-- 如需禁用寄存器写入验证，可在 [config.h](https://github.com/worldyun/sk120x-controller/tree/main/include/config.h) 中注释 `CONFIG_SK_DEVICE_REGISTERS_WRITE_VERIFY_ENABLE`。
+- SK120X 设备需通过[UART接口](./include/config.h#L53-L57)与 ESP32-C3 正确连接。
+- 若更改 ModBus 地址，请确保 [CONFIG_SK_DEVICE_MODBUS_ADDRESS](./include/config.h#L65-L66) 与设备一致。
+- 如需禁用寄存器写入验证，可在 [config.h](./include/config.h) 中注释 `CONFIG_SK_DEVICE_REGISTERS_WRITE_VERIFY_ENABLE`。
 
 ---
 
