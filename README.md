@@ -18,7 +18,7 @@
 
 ---
 ## 🚀 快速开始
-1. **硬件准备**：
+### 1. **硬件准备**：
 - 硬件设备：ESP32C3开发板或核心板，xm1.25毫米间距4p连接线
 
 - 设备连接： 
@@ -30,12 +30,12 @@
   |    GPIO19     |   RX   |
   |      GND      |  GND   |
 
-2. **软件准备**：
+### 2. **软件准备**：
 - 乐鑫官方[Flash下载工具](https://docs.espressif.com/projects/esp-test-tools/zh_CN/latest/esp32/production_stage/tools/flash_download_tool.html)
 - 设备固件[sk120x-controller-firmware.bin](https://github.com/worldyun/sk120x-controller/releases)
 - 移动端上位机软件[sk120x-controller-app](https://github.com/worldyun/sk120x-controller-app)
 
-3. 固件烧录
+### 3. 固件烧录
 - 参考乐鑫官方[Flash下载工具](https://docs.espressif.com/projects/esp-test-tools/zh_CN/latest/esp32/production_stage/tools/flash_download_tool.html)，将`sk120x-controller-firmware.bin`下载至ESP32C3`0x0`地址。
 ---
 
