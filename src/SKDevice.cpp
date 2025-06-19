@@ -149,7 +149,7 @@ void SKDevice::initTop10RegistersAutoRead() {
             SKDevice* skDevice = static_cast<SKDevice*>(param);
             while (true) {
                 // 读取前10个寄存器
-                skDevice->readSkDeviceRegisters(10); // 读取前10个寄存器
+                skDevice->readSkDeviceRegisters(); // 读取前10个寄存器
                 vTaskDelay(pdMS_TO_TICKS(CONFIG_SK_DEVICE_REGISTERS_READ_INTERVAL)); 
             }
         },
