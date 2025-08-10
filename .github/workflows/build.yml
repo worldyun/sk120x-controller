@@ -45,5 +45,5 @@ jobs:
       if: success()
       uses: actions/upload-artifact@v4
       with:
-        name: firmware
+        name: sk120x-controller-firmware
         path: sk120x-controller
