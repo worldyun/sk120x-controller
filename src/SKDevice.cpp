@@ -94,7 +94,8 @@ void SKDevice::initSKDeviceRegisters() {
         vTaskDelay(pdMS_TO_TICKS(CONFIG_SK_DEVICE_STARTUP_WAIT_TIME));
     }
     LOG_INFO("SK 设备寄存器初始化完成");
-    if (CONFIG_LOG_LEVEL >= LOG_LEVEL_INFO) {
+    // 打印系统信息
+    #if CONFIG_LOG_LEVEL >= LOG_LEVEL_INFO
         // 打印值以验证
         LOG_INFO("设置电压: %d", skDeviceModbusRegisters->vSet);
         LOG_INFO("设置电流: %d", skDeviceModbusRegisters->iSet);
@@ -134,7 +135,7 @@ void SKDevice::initSKDeviceRegisters() {
         LOG_INFO("电池充电截止电流: %d", skDeviceModbusRegisters->batteryChargeCutoffI);
         LOG_INFO("恒功率使能: %d", skDeviceModbusRegisters->cwEnable);
         LOG_INFO("恒功率值: %d", skDeviceModbusRegisters->cw);
-    }
+    #endif
 }
 
 /**
