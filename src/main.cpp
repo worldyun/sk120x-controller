@@ -21,15 +21,15 @@ void setup() {
 
     // 初始化日志
     logInit();
-    // 初始化 BLE 服务
-    BLE::init();
 
     // 等待2秒以确保SK设备启动完成
     LOG_INFO("等待 SK 设备启动");
     vTaskDelay(pdMS_TO_TICKS(CONFIG_SK_DEVICE_STARTUP_WAIT_TIME));
-
     // 初始化 SK 设备
     SKDevice::init();
+
+    // 初始化 BLE 服务
+    BLE::init();
 
     LOG_INFO("Setup done!");
 }
