@@ -276,37 +276,17 @@ uint16_t SKDevice::readSkDeviceRegister(uint16_t registerAddr) {
  * @param func 要执行的函数
  */
 void SKDevice::executeInLock(const std::function<void()>& func) {
-#ifdef CONFIG_SK_DEVICE_MODBUS_OPERATION_INTERVAL_ENABLE
-    // 创建一个静态变量来存储this指针，供定时器回调函数使用
-    static SKDevice* skDeviceInstance = nullptr;
-    static TimerHandle_t unlockTimer = nullptr;
-    
-    // 首次调用时初始化定时器
-    if (unlockTimer == nullptr) {
-        skDeviceInstance = this;
-        unlockTimer = xTimerCreate(
-            "UnlockTimer",
-            pdMS_TO_TICKS(CONFIG_SK_DEVICE_MODBUS_OPERATION_INTERVAL),
-            pdFALSE, // 单次定时器
-            nullptr,
-            [](TimerHandle_t timer) {
-                // 定时器回调函数中释放锁
-                if (skDeviceInstance != nullptr && skDeviceInstance->modbusMutex != nullptr) {
-                    xSemaphoreGive(skDeviceInstance->modbusMutex);
-                }
-            }
-        );
-    }
-#endif
+
     // 获取锁
     xSemaphoreTake(modbusMutex, portMAX_DELAY);
+    
     // 执行函数
     func();
+
 #ifdef CONFIG_SK_DEVICE_MODBUS_OPERATION_INTERVAL_ENABLE
-    // 启动定时器，3ms后释放锁
-    xTimerStart(unlockTimer, 0);
-#else
-    xSemaphoreGive(modbusMutex);
+    vTaskDelay(pdMS_TO_TICKS(CONFIG_SK_DEVICE_MODBUS_OPERATION_INTERVAL));
 #endif
+    // 释放锁
+    xSemaphoreGive(modbusMutex);
 }
 

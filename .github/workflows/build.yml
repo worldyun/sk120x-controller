@@ -33,7 +33,7 @@ jobs:
       run: pio run
 
     - name: Merge firmware binaries
-      run: esptool --chip esp32c3 merge_bin -o .pio/build/airm2m_core_esp32c3/sk120x-controller.bin \
+      run: esptool --chip esp32c3 merge_bin -o .pio/build/airm2m_core_esp32c3/sk120x-controller-firmware.bin \
             0x1000 .pio/build/airm2m_core_esp32c3/bootloader.bin \
             0x8000 .pio/build/airm2m_core_esp32c3/partitions.bin \
             0x10000 .pio/build/airm2m_core_esp32c3/firmware.bin
