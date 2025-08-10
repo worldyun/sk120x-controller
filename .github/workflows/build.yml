@@ -37,10 +37,13 @@ jobs:
             0x1000 .pio/build/airm2m_core_esp32c3/bootloader.bin \
             0x8000 .pio/build/airm2m_core_esp32c3/partitions.bin \
             0x10000 .pio/build/airm2m_core_esp32c3/firmware.bin
+    
+    - name: Rename firmware binary
+      run: mkdir -p sk120x-controller && cp .pio/build/airm2m_core_esp32c3/*.bin sk120x-controller/
 
     - name: Upload firmware artifacts
       if: success()
       uses: actions/upload-artifact@v4
       with:
         name: firmware
-        path: .pio/build/**/*.bin
+        path: sk120x-controller
