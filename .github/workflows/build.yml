@@ -1,0 +1,50 @@
+name: PlatformIO CI
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Cache PlatformIO dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.platformio/.cache
+          ~/.platformio/packages
+        key: ${{ runner.os }}-pio-${{ hashFiles('platformio.ini') }}
+        restore-keys: |
+          ${{ runner.os }}-pio-
+
+    - name: Install PlatformIO Core
+      uses: platformio/platformio-core-action@v1
+      with:
+        platformio-core-version: 6.1
+
+    - name: Build all environments
+      run: pio run
+
+    - name : Install esptool
+      run: pip install esptool
+
+    - name: Merge firmware binaries
+      run: esptool.py --chip esp32c3 merge_bin -o .pio/build/airm2m_core_esp32c3/sk120x-controller.bin \
+            0x1000 .pio/build/airm2m_core_esp32c3/bootloader.bin \
+            0x8000 .pio/build/airm2m_core_esp32c3/partitions.bin \
+            0x10000 .pio/build/airm2m_core_esp32c3/firmware.bin
+
+    - name: Upload firmware artifacts
+      if: success()
+      uses: actions/upload-artifact@v3
+      with:
+        name: firmware
+        path: .pio/build/**/*.bin
