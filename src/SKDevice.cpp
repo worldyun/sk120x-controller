@@ -90,7 +90,7 @@ void SKDevice::initSKDeviceRegisters() {
     // 读取寄存器值 自旋等待直到寄存器可读
     while (readSkDeviceRegisters() != 0) {
         LOG_ERROR("SK 设备寄存器初始化失败，即将重试...");
-        // 重启
+        // 等待一段时间后重试
         vTaskDelay(pdMS_TO_TICKS(CONFIG_SK_DEVICE_STARTUP_WAIT_TIME));
     }
     LOG_INFO("SK 设备寄存器初始化完成");
