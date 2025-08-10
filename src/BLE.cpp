@@ -52,6 +52,7 @@ void BLE::start() {
     xTaskCreate(
         [](void* param) {
             BLE* ble = static_cast<BLE*>(param);
+            uint8_t data[CONFIG_BLE_NOTIFY_TOP10_REG_SIZE] = {0}; // 用于存储读取的寄存器数据
             while (true) {
                 // 发送通知
                 if ( ble->bleServer->getConnectedCount() > 0 
@@ -59,7 +60,12 @@ void BLE::start() {
                         && ble->isConnected 
                         && SKDevice::getInstance() != nullptr 
                         && SKDevice::getInstance()->isInited) {
-                    ble->notifyTop10RegCharacteristic->setValue((uint8_t *)(SKDevice::getInstance()->getSkDeviceModbusRegisters()), CONFIG_BLE_NOTIFY_TOP10_REG_SIZE);
+                    // 复制寄存器数据到data数组
+                    memcpy(data, SKDevice::getInstance()->getSkDeviceModbusRegisters(), CONFIG_BLE_NOTIFY_TOP10_REG_SIZE);
+                    // 将输出使能放在输出瓦时高2字节的首位
+                    data[15] &= 0x7F; // 清除首位
+                    data[15] |= (SKDevice::getInstance()->getSkDeviceModbusRegisters()->outEnable << 7);
+                    ble->notifyTop10RegCharacteristic->setValue(data, CONFIG_BLE_NOTIFY_TOP10_REG_SIZE);
                     ble->notifyTop10RegCharacteristic->notify(); // 发送通知
                 }
                 vTaskDelay(pdMS_TO_TICKS(CONFIG_BLE_NOTIFY_TOP10_REG_INTERVAL));

@@ -68,15 +68,13 @@ void SKDevice::initSKSerialAndModbus() {
  */
 void SKDevice::initSKDeviceRegisters() {
     LOG_INFO("SK 初始化设备寄存器");
-    //加锁
-    xSemaphoreTake(modbusMutex, portMAX_DELAY);
-    if (skModbus->readHoldingRegister(CONFIG_SK_DEVICE_MODBUS_ADDRESS, SK_DEVICE_MODBUS_REGISTER_ADDRESS::DEVICE_STATUS) == 1) {
-        LOG_INFO("SK 设备未启动");
-    } else {
-        LOG_INFO("SK 设备已启动");
-    }
-    //解锁
-    xSemaphoreGive(modbusMutex);
+    executeInLock([&]() {
+        if (skModbus->readHoldingRegister(CONFIG_SK_DEVICE_MODBUS_ADDRESS, SK_DEVICE_MODBUS_REGISTER_ADDRESS::DEVICE_STATUS) == 1) {
+            LOG_INFO("SK 设备未启动");
+        } else {
+            LOG_INFO("SK 设备已启动");
+        }
+    });
 
     //初始化寄存器对象
     skDeviceModbusRegisters = (SkDeviceModbusRegisters *)malloc(sizeof(SkDeviceModbusRegisters));
@@ -87,14 +85,15 @@ void SKDevice::initSKDeviceRegisters() {
     }
     memset(skDeviceModbusRegisters, 0, sizeof(SkDeviceModbusRegisters));
 
-    // 读取寄存器值
-    if (readSkDeviceRegisters() != 0) {
-        LOG_ERROR("SK 设备寄存器初始化失败，重启中...");
-        // 重启
-        ESP.restart();
+    // 读取寄存器值 自旋等待直到寄存器可读
+    while (readSkDeviceRegisters() != 0) {
+        LOG_ERROR("SK 设备寄存器初始化失败，即将重试...");
+        // 等待一段时间后重试
+        vTaskDelay(pdMS_TO_TICKS(CONFIG_SK_DEVICE_STARTUP_WAIT_TIME));
     }
     LOG_INFO("SK 设备寄存器初始化完成");
-    if (CONFIG_LOG_LEVEL >= LOG_LEVEL_INFO) {
+    // 打印SK设备信息
+    #if CONFIG_LOG_LEVEL >= LOG_LEVEL_INFO
         // 打印值以验证
         LOG_INFO("设置电压: %d", skDeviceModbusRegisters->vSet);
         LOG_INFO("设置电流: %d", skDeviceModbusRegisters->iSet);
@@ -134,7 +133,7 @@ void SKDevice::initSKDeviceRegisters() {
         LOG_INFO("电池充电截止电流: %d", skDeviceModbusRegisters->batteryChargeCutoffI);
         LOG_INFO("恒功率使能: %d", skDeviceModbusRegisters->cwEnable);
         LOG_INFO("恒功率值: %d", skDeviceModbusRegisters->cw);
-    }
+    #endif
 }
 
 /**
@@ -149,7 +148,7 @@ void SKDevice::initTop10RegistersAutoRead() {
             SKDevice* skDevice = static_cast<SKDevice*>(param);
             while (true) {
                 // 读取前10个寄存器
-                skDevice->readSkDeviceRegisters(10); // 读取前10个寄存器
+                skDevice->readSkDeviceRegisters(); // 读取前10个寄存器
                 vTaskDelay(pdMS_TO_TICKS(CONFIG_SK_DEVICE_REGISTERS_READ_INTERVAL)); 
             }
         },
@@ -193,29 +192,26 @@ uint16_t SKDevice::setSkDeviceRegister(uint16_t registerAddr, uint16_t data) {
         return ESP_FAIL;
     }
 
-    //加锁
-    xSemaphoreTake(modbusMutex, portMAX_DELAY);
-    // 设置寄存器
-    skModbus->writeHoldingRegister(CONFIG_SK_DEVICE_MODBUS_ADDRESS, registerAddr, data); 
+    executeInLock([&]() {
+        skModbus->writeHoldingRegister(CONFIG_SK_DEVICE_MODBUS_ADDRESS, registerAddr, data);
+    });
 
 #ifdef CONFIG_SK_DEVICE_REGISTERS_WRITE_VERIFY_ENABLE
-    // 读取寄存器以验证设置是否成功
-    uint16_t readData = skModbus->readHoldingRegister(CONFIG_SK_DEVICE_MODBUS_ADDRESS, registerAddr);
-    //解锁
-    xSemaphoreGive(modbusMutex);
+    uint16_t readData = 0;
+    executeInLock([&]() {
+        readData = skModbus->readHoldingRegister(CONFIG_SK_DEVICE_MODBUS_ADDRESS, registerAddr);
+    });
+    
     if (readData != data) {
         LOG_ERROR("SK 寄存器设置失败, 地址: %X, 设置数据: %d, 读取数据: %d", registerAddr, data, readData);
     } else {
         LOG_INFO("SK 寄存器设置成功, 地址: %X, 数据: %d", registerAddr, readData);
     }
-    return readData; // 返回读取的数据
+    return readData;
 #else
-    //解锁
-    xSemaphoreGive(modbusMutex);
     LOG_INFO("SK 寄存器已设置, 地址: %X, 数据: %d", registerAddr, data);
-    return data; // 返回设置的数据
+    return data;
 #endif
-    
 }
 
 bool SKDevice::isWritableRegister(uint16_t registerAddr) {
@@ -237,24 +233,15 @@ uint8_t SKDevice::readSkDeviceRegisters(uint16_t registerNumber) {
 
     // 采用一次读多个寄存器的方式
     LOG_INFO("SK 读取前 %d 个寄存器", registerNumber);
-    //加锁
-    xSemaphoreTake(modbusMutex, portMAX_DELAY);
-    uint8_t err = skModbus->readHoldingRegister(CONFIG_SK_DEVICE_MODBUS_ADDRESS, 0x0, (uint16_t*)skDeviceModbusRegisters, registerNumber);
-    //解锁
-    xSemaphoreGive(modbusMutex);
+    uint8_t err = 0;
+    executeInLock([&]() {
+        err = skModbus->readHoldingRegister(CONFIG_SK_DEVICE_MODBUS_ADDRESS, 0x0, (uint16_t*)skDeviceModbusRegisters, registerNumber);
+    });
     if (err != 0) {
         LOG_ERROR("SK 读取寄存器失败");
     }
     
     return err;
-    // for (size_t i = 0; i < registerNumber; i++) {
-    //     uint16_t* p = (uint16_t*)(((size_t)skDeviceModbusRegisters) + i * 2);
-    //     //加锁
-    //     xSemaphoreTake(modbusMutex, portMAX_DELAY);
-    //     *p = skModbus->readHoldingRegister(CONFIG_SK_DEVICE_MODBUS_ADDRESS, i);
-    //     //解锁
-    //     xSemaphoreGive(modbusMutex);
-    // }
 }
 
 /**
@@ -276,11 +263,50 @@ void SKDevice::initMutex() {
  * @return uint16_t 寄存器数据
  */
 uint16_t SKDevice::readSkDeviceRegister(uint16_t registerAddr) {
-    //加锁
-    xSemaphoreTake(modbusMutex, portMAX_DELAY);
-    uint16_t data = skModbus->readHoldingRegister(CONFIG_SK_DEVICE_MODBUS_ADDRESS, registerAddr); // 读取寄存器
-    //解锁
-    xSemaphoreGive(modbusMutex);
+    uint16_t data = 0; // 用于存储读取的数据
+    executeInLock([&]() {
+        data = skModbus->readHoldingRegister(CONFIG_SK_DEVICE_MODBUS_ADDRESS, registerAddr);
+    });
     return data; // 返回读取的数据
+}
+
+/**
+ * @brief 在modbusMutex互斥锁保护下执行给定的函数
+ * 
+ * @param func 要执行的函数
+ */
+void SKDevice::executeInLock(const std::function<void()>& func) {
+#ifdef CONFIG_SK_DEVICE_MODBUS_OPERATION_INTERVAL_ENABLE
+    // 创建一个静态变量来存储this指针，供定时器回调函数使用
+    static SKDevice* skDeviceInstance = nullptr;
+    static TimerHandle_t unlockTimer = nullptr;
+    
+    // 首次调用时初始化定时器
+    if (unlockTimer == nullptr) {
+        skDeviceInstance = this;
+        unlockTimer = xTimerCreate(
+            "UnlockTimer",
+            pdMS_TO_TICKS(CONFIG_SK_DEVICE_MODBUS_OPERATION_INTERVAL),
+            pdFALSE, // 单次定时器
+            nullptr,
+            [](TimerHandle_t timer) {
+                // 定时器回调函数中释放锁
+                if (skDeviceInstance != nullptr && skDeviceInstance->modbusMutex != nullptr) {
+                    xSemaphoreGive(skDeviceInstance->modbusMutex);
+                }
+            }
+        );
+    }
+#endif
+    // 获取锁
+    xSemaphoreTake(modbusMutex, portMAX_DELAY);
+    // 执行函数
+    func();
+#ifdef CONFIG_SK_DEVICE_MODBUS_OPERATION_INTERVAL_ENABLE
+    // 启动定时器，3ms后释放锁
+    xTimerStart(unlockTimer, 0);
+#else
+    xSemaphoreGive(modbusMutex);
+#endif
 }
 
