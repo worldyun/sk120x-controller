@@ -45,5 +45,6 @@ private:
     void initSKDeviceRegisters(); // 初始化SK设备寄存器
     void initTop10RegistersAutoRead(); // 初始化前10个寄存器自动读取
     void initMutex(); // 初始化互斥锁
+    void executeInLock(const std::function<void()>& func); // 锁定执行
 
 };

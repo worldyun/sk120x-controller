@@ -91,6 +91,12 @@
     //如果不需要验证可以注释掉
     #define CONFIG_SK_DEVICE_REGISTERS_WRITE_VERIFY_ENABLE
 
+    //modbus两次操作间隔时间
+    #define CONFIG_SK_DEVICE_MODBUS_OPERATION_INTERVAL 3
+
+    //modbus两次操作间隔时间是否启用
+    #define CONFIG_SK_DEVICE_MODBUS_OPERATION_INTERVAL_ENABLE
+
     //操作码枚举
     namespace BLE_FUNC_CODE {
         enum BLE_FUNC_CODE_ENUM {
